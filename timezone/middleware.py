@@ -19,3 +19,7 @@ class TimezoneMiddleware(object):
                 timezone.activate(pytz.timezone(tzname[0].timezone))
             else:
                 timezone.deactivate()
+
+    def process_response(self, request, response):
+        response['X-Timezone'] = request.session.get('django_timezone')
+        return response
