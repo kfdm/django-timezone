@@ -1,13 +1,14 @@
 from django.utils import timezone
+from django.utils.deprecation import MiddlewareMixin
 
 import pytz
 
 from timezone.models import Timezone
 
 
-class TimezoneMiddleware(object):
+class TimezoneMiddleware(MiddlewareMixin):
     def process_request(self, request):
-        if not request.user.is_authenticated():
+        if not request.user.is_authenticated:
             timezone.deactivate()
             return
 

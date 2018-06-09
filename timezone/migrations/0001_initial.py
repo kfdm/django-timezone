@@ -15,7 +15,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Timezone',
             fields=[
-                ('owner', models.OneToOneField(to=settings.AUTH_USER_MODEL, related_name='timezone', serialize=False, primary_key=True)),
+                ('owner', models.OneToOneField(to=settings.AUTH_USER_MODEL, related_name='timezone', serialize=False, primary_key=True, on_delete=models.CASCADE)),
                 ('timezone', models.CharField(max_length=32)),
             ],
         ),
