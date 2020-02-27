@@ -1,26 +1,28 @@
 from django.utils import timezone
 from django.utils.deprecation import MiddlewareMixin
-
-import pytz
+from django.utils.functional import SimpleLazyObject
 
 from timezone.models import Timezone
 
 
-class TimezoneMiddleware(MiddlewareMixin):
-    def process_request(self, request):
+def get_timezone(request):
+    if not hasattr(request, "_cached_timezone"):
         if not request.user.is_authenticated:
             timezone.deactivate()
-            return
+            request._cached_timezone = None
+        else:
+            tz, created = Timezone.objects.get_or_create(owner=request.user)
+            timezone.activate(tz.timezone)
+            request._cached_timezone = tz
 
-        tzname = request.session.get('django_timezone')
-        if tzname:
-            timezone.activate(pytz.timezone(tzname))
-            return
+    return request._cached_timezone
 
-        tz, created = Timezone.objects.get_or_create(owner=request.user)
-        request.session['django_timezone'] = tz.timezone
-        timezone.activate(pytz.timezone(tz.timezone))
+
+class TimezoneMiddleware(MiddlewareMixin):
+    def process_request(self, request):
+        request.timezone = SimpleLazyObject(lambda: get_timezone(request))
 
     def process_response(self, request, response):
-        response['X-Timezone'] = request.session.get('django_timezone')
+        if hasattr(request, "_cached_timezone"):
+            response["X-Timezone"] = request._cached_timezone
         return response
