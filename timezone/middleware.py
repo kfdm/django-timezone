@@ -21,3 +21,8 @@ def get_timezone(request):
 class TimezoneMiddleware(MiddlewareMixin):
     def process_request(self, request):
         request.timezone = SimpleLazyObject(lambda: get_timezone(request))
+
+    def process_response(self, request, response):
+        if hasattr(request, "_cached_timezone"):
+            response["X-Timezone"] = request._cached_timezone
+        return response
