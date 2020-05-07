@@ -17,7 +17,7 @@ class Timezone(models.Model):
         return pytz.timezone(self.timezone)
 
     def now(self):
-        return datetime.now(tz=self.tzinfo)
+        return datetime.datetime.now(tz=self.tzinfo)
 
     @classmethod
     def for_user(cls, owner):
